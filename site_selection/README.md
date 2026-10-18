@@ -57,6 +57,9 @@ An interactive version, where you can toggle k and hover zones and FCs, is in [`
 
 ![Marginal saving](figures/marginal_freight_saving.png)
 
+### Analysis: what we chose and why
+Every decision, from the number of FCs and the exact sites to the model, demand unit, candidates and distance method, is listed with the options considered and the reason for the choice in **[ANALYSIS.md](ANALYSIS.md)**. The same section appears on the website.
+
 ## 4. Method
 
 ```

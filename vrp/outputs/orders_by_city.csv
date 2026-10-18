@@ -1,0 +1,35 @@
+city,orders,day,share_pct
+sao paulo,44,normal,69.8
+sao bernardo do campo,5,normal,7.9
+guarulhos,3,normal,4.8
+osasco,3,normal,4.8
+santo andre,2,normal,3.2
+cajamar,1,normal,1.6
+diadema,1,normal,1.6
+itapevi,1,normal,1.6
+maua,1,normal,1.6
+ribeirao pires,1,normal,1.6
+taboao da serra,1,normal,1.6
+sao paulo,167,black_friday,67.3
+sao bernardo do campo,13,black_friday,5.2
+santo andre,11,black_friday,4.4
+guarulhos,7,black_friday,2.8
+osasco,7,black_friday,2.8
+barueri,5,black_friday,2.0
+embu das artes,5,black_friday,2.0
+santana de parnaiba,5,black_friday,2.0
+cajamar,3,black_friday,1.2
+suzano,3,black_friday,1.2
+taboao da serra,3,black_friday,1.2
+carapicuiba,2,black_friday,0.8
+diadema,2,black_friday,0.8
+francisco morato,2,black_friday,0.8
+mogi das cruzes,2,black_friday,0.8
+poa,2,black_friday,0.8
+ribeirao pires,2,black_friday,0.8
+sao caetano do sul,2,black_friday,0.8
+caieiras,1,black_friday,0.4
+cotia,1,black_friday,0.4
+mairipora,1,black_friday,0.4
+pirapora do bom jesus,1,black_friday,0.4
+vargem grande paulista,1,black_friday,0.4

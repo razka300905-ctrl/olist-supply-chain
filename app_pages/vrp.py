@@ -146,6 +146,17 @@ st.markdown(
     f"R$ {bm.cost_per_order:.2f}, because stops are closer together. Growth makes last-mile cheaper per parcel."
 )
 
+# ------------------------------------------------------------------ analysis: what we chose and why
+st.divider()
+st.markdown((ROOT / "vrp" / "ANALYSIS.md").read_text(encoding="utf-8"))
+with st.expander(f"Orders per municipality ({DAY_LABEL[day]})"):
+    cities = load("orders_by_city")
+    cities = cities[cities.day == day].assign(city=lambda d: d.city.str.title())
+    st.dataframe(cities[["city", "orders", "share_pct"]], hide_index=True, width="stretch",
+                 column_config={"city": "Municipality", "orders": st.column_config.NumberColumn("Orders", format="%d"),
+                                "share_pct": st.column_config.ProgressColumn("Share", format="%.0f%%", min_value=0, max_value=100)})
+st.divider()
+
 with st.expander("All scenarios (data table)"):
     st.dataframe(sc.drop(columns=["fleet_bound_reached"], errors="ignore"), hide_index=True, width="stretch")
 

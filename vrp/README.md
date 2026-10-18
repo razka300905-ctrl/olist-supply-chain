@@ -52,6 +52,9 @@ The study compares two real days from the data:
 | **Black Friday: mixed** | **6** | **9** | **1,466** | **4,882** | **19.69** | **0** |
 | Black Friday: normal-day fleet only | 2 | 2 | 397 | 1,380 | – | **130** |
 
+### Analysis: what we chose and why
+The service area is the **Grande São Paulo metro region**: São Paulo city is ~70% of orders, plus 10–22 neighbouring municipalities such as São Bernardo do Campo, Guarulhos, Osasco and Santo André. Every choice, including the area, the days, the model, the solver, the fleet options, the baseline and the assumptions, is listed with the alternatives and the reason in **[ANALYSIS.md](ANALYSIS.md)**. The same section appears on the website.
+
 ## 4. Method
 
 ```

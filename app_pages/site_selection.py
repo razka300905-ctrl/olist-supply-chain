@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 
-from app_common import MUTED, SERIES, fc_label, hub_color, load_site, setup_page
+from app_common import MUTED, ROOT, SERIES, fc_label, hub_color, load_site, setup_page
 
 setup_page("Site Selection", "📍")
 
@@ -152,6 +152,10 @@ with c2:
     )
     st.caption("Choosing big metros costs only about 4% more distance but brings labour, real estate and carrier access.")
 
+st.divider()
+
+# ------------------------------------------------------------------ analysis: what we chose and why
+st.markdown((ROOT / "site_selection" / "ANALYSIS.md").read_text(encoding="utf-8"))
 st.divider()
 
 # ------------------------------------------------------------------ full table, method, limitations

@@ -27,13 +27,19 @@ def main() -> None:
     normal_day = window.iloc[(window.orders - median).abs().argsort().iloc[0]].purchase_date
 
     days = {"normal": normal_day, "black_friday": PEAK_DAY}
+    by_city = []
     for label, day in days.items():
         orders = pd.read_sql("SELECT * FROM vrp_orders WHERE purchase_date = ?", con, params=[day])
         orders.to_csv(OUT / f"orders_{label}.csv", index=False)
+        by_city.append(orders.groupby("city").size().rename("orders").reset_index().assign(day=label))
         print(f"{label:<13} {day}: {len(orders):>4} orders, {orders.weight_kg.sum():7.1f} kg, "
               f"{orders.volume_l.sum():8.1f} L, heaviest {orders.weight_kg.max():.1f} kg, "
               f"{orders.zip5.nunique()} distinct zips")
 
+    # The service area is a metro region (many municipalities), not one city
+    cities = pd.concat(by_city)
+    cities["share_pct"] = (cities.orders / cities.groupby("day").orders.transform("sum") * 100).round(1)
+    cities.sort_values(["day", "orders"], ascending=[False, False]).to_csv(OUT / "orders_by_city.csv", index=False)
     daily.to_csv(OUT / "daily_orders.csv", index=False)
     pd.Series(days).to_csv(OUT / "scenario_days.csv", header=["date"], index_label="day")
     print(f"\nMedian Tue-Thu (Mar-May 2018): {median:.0f} orders/day; all-time daily max: "
