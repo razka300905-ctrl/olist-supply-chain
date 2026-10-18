@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 
-from app_common import (LIGHT_BLUE, ROOT, SERIES, callout, hero, kpis, md_file, purpose, section, setup_page,
+from app_common import (read_csv, LIGHT_BLUE, ROOT, SERIES, callout, hero, kpis, md_file, purpose, section, setup_page,
                         style_fig)
 
 setup_page("Inventory", "📦")
@@ -12,9 +12,8 @@ setup_page("Inventory", "📦")
 INV_OUT = ROOT / "inventory" / "outputs"
 
 
-@st.cache_data
 def load(name, **kw):
-    return pd.read_csv(INV_OUT / f"{name}.csv", **kw)
+    return read_csv(INV_OUT / f"{name}.csv", **kw)
 
 
 t = load("policy_tradeoff")

@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
 
-from app_common import (LIGHT_BLUE, ROOT, SERIES, callout, hero, kpis, md_file, purpose, section, setup_page,
+from app_common import (read_csv, LIGHT_BLUE, ROOT, SERIES, callout, hero, kpis, md_file, purpose, section, setup_page,
                         style_fig)
 
 setup_page("Vehicle Routing", "🚚")
@@ -15,9 +15,8 @@ FLEET_LABEL = {"van_only": "Van only", "motorbike_only": "Motorbike only", "mixe
 DAY_LABEL = {"normal": "Normal day", "black_friday": "Black Friday"}
 
 
-@st.cache_data
-def load(name):
-    return pd.read_csv(VRP_OUT / f"{name}.csv")
+def load(name, **kw):
+    return read_csv(VRP_OUT / f"{name}.csv", **kw)
 
 
 sc = load("vrp_scenarios")

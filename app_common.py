@@ -167,13 +167,22 @@ def style_fig(fig, height: int | None = None):
 
 
 @st.cache_data
+def _read_csv(path: str, mtime: float, kw: tuple) -> pd.DataFrame:
+    return pd.read_csv(path, **dict(kw))
+
+
+def read_csv(path: Path, **kw) -> pd.DataFrame:
+    """Cached CSV read. The file's modification time is part of the cache key, so new results
+    pushed to the repo are picked up after a redeploy instead of serving a stale cached copy."""
+    return _read_csv(str(path), path.stat().st_mtime, tuple(sorted(kw.items())))
+
+
 def load_site(name: str, **kw) -> pd.DataFrame:
-    return pd.read_csv(SITE_OUT / f"{name}.csv", **kw)
+    return read_csv(SITE_OUT / f"{name}.csv", **kw)
 
 
-@st.cache_data
 def load_report(name: str) -> pd.DataFrame:
-    return pd.read_csv(PIPE_REPORTS / f"{name}.csv")
+    return read_csv(PIPE_REPORTS / f"{name}.csv")
 
 
 def md_file(path: Path) -> None:
