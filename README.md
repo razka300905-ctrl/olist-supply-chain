@@ -2,7 +2,7 @@
 
 Three end-to-end supply-chain case studies on the [Olist Brazilian e-commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (~100k orders, 2016–2018). They are built with **Python + SQL** and presented as an interactive **Streamlit** app.
 
-**Live app:** `https://<your-app-name>.streamlit.app` *(added after deployment)*
+**Live app: [site-selection-vrp.streamlit.app](https://site-selection-vrp.streamlit.app/)**
 
 | # | Project | Status | Folder |
 |---|---|---|---|

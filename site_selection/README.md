@@ -2,6 +2,8 @@
 
 **Mini project 1 of 3 in a supply-chain portfolio** (1. Site selection, 2. Vehicle routing, 3. Inventory management), built on the public [Olist Brazilian e-commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (~100k orders, 2016–2018).
 
+**Interactive version: [site-selection-vrp.streamlit.app](https://site-selection-vrp.streamlit.app/site_selection)**
+
 **Tools:** Python data-cleaning pipeline · SQL (SQLite) for data modelling · Python (pandas, PuLP + HiGHS) for optimisation · matplotlib / folium for visuals
 
 ---
