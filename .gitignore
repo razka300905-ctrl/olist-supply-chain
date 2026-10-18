@@ -1,0 +1,8 @@
+.venv/
+.claude/
+__pycache__/
+olist.db
+archive.zip
+# Raw Kaggle CSVs (121 MB) - download them, see README
+archive/
+data_pipeline/clean_csv/

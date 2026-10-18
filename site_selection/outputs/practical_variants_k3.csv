@@ -1,0 +1,5 @@
+variant,sites,avg_km,pct_within_300km,pct_within_800km,extra_km_vs_optimal_pct
+Optimal (model),"Juiz De Fora-MG, Lagarto-SE, Sao Paulo-SP",411.27,57.74,81.7,0.0
+SP + Rio + Salvador,"Sao Paulo-SP, Rio De Janeiro-RJ, Salvador-BA",429.15,53.09,79.63,4.35
+SP + Belo Horizonte + Recife,"Sao Paulo-SP, Belo Horizonte-MG, Recife-PE",427.73,47.2,80.46,4.0
+SP + Rio + Recife,"Sao Paulo-SP, Rio De Janeiro-RJ, Recife-PE",429.95,52.91,78.9,4.54

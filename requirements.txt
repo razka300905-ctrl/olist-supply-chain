@@ -1,0 +1,5 @@
+# Streamlit app (used by Streamlit Community Cloud).
+# The analysis pipeline has its own list: site_selection/requirements.txt
+streamlit==1.66.0
+pandas==3.0.6
+plotly==7.1.0

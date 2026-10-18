@@ -1,0 +1,11 @@
+table,raw_rows,clean_rows,columns
+customers,99441,99441,5
+sellers,3095,3095,4
+orders,99441,99441,16
+order_items,112650,112650,7
+order_payments,103886,103886,5
+order_reviews,99224,99224,6
+products,32951,32951,12
+category_translation,71,73,2
+geolocation,1000163,720462,5
+geo_zip_centroid,-,19172,7

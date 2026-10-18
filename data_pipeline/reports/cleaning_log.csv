@@ -1,0 +1,40 @@
+table,rule,rows_affected,action
+category_translation,categories missing an English name,2,added manually
+geolocation,coordinates outside Brazil bounding box,42,dropped
+geolocation,exact duplicate rows (after standardizing city names),279659,dropped
+order_items,freight_value = 0 (free shipping),383,kept (legitimate)
+order_items,price <= 0 or freight < 0,0,none found
+customers,"city names standardized (accents, case, suffixes, symbols)",0,rewritten
+sellers,"city names standardized (accents, case, '/sp' and ', brasil' tails, symbols)",36,rewritten
+sellers,"city not a known city name (e.g. 04482255, aguas claras df, angra dos reis rj, ao bernardo do campo, bahia, balenario camboriu)",44,replaced with city of the zip code
+orders,status 'delivered' but no delivery date,8,flagged
+orders,handed to carrier before purchase timestamp,166,flagged
+orders,delivered to customer before carrier pickup,23,flagged
+orders,orders with no order_items rows,775,flagged
+orders,valid delivered orders (delivered + date + items + consistent dates),96447,is_valid_delivered = 1
+order_payments,payment_installments = 0,2,set to 1 (a payment has at least one installment)
+order_payments,payment_type = 'not_defined',3,"kept, value is 0"
+order_reviews,free-text columns review_comment_title (88% empty) / review_comment_message (59% empty),2,dropped columns (not used in supply-chain analyses); kept has_comment flag
+order_reviews,"duplicate (review_id, order_id) pairs",0,dropped
+order_reviews,orders with more than one review,551,kept (customer re-reviewed)
+products,column-name typos ('lenght'),2,renamed to '_length'
+products,missing product category,610,set to 'unknown'
+products,weight/dimensions missing or 0,6,"imputed with category median, flagged"
+geo_zip_centroid,customer/seller zips missing from geolocation,163,"162 imputed from 3-digit zone centroid, 1 left without coordinates"
+validation,primary key unique: customers(customer_id),0,PASS 
+validation,primary key unique: sellers(seller_id),0,PASS 
+validation,primary key unique: orders(order_id),0,PASS 
+validation,primary key unique: products(product_id),0,PASS 
+validation,"primary key unique: order_items(order_id, order_item_id)",0,PASS 
+validation,"primary key unique: order_payments(order_id, payment_sequential)",0,PASS 
+validation,"primary key unique: order_reviews(review_id, order_id)",0,PASS 
+validation,zip codes are 5-digit text,0,PASS 
+validation,states are valid Brazilian UFs,0,PASS 
+validation,no missing city names,0,PASS 
+validation,foreign key: order_items.order_id -> orders,0,PASS 
+validation,foreign key: order_items.product_id -> products,0,PASS 
+validation,foreign key: order_items.seller_id -> sellers,0,PASS 
+validation,foreign key: orders.customer_id -> customers,0,PASS 
+validation,foreign key: order_payments.order_id -> orders,0,PASS 
+validation,foreign key: order_reviews.order_id -> orders,0,PASS 
+validation,customer zips with coordinates >= 99.5%,0,PASS (100.00%)

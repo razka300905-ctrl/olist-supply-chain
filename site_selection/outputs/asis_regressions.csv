@@ -1,0 +1,9 @@
+,value
+days_intercept,8.6339
+days_per_100km,0.4671
+days_r2,0.1833
+freight_intercept,8.2465
+freight_per_100km,0.8168
+freight_per_kg,2.5678
+freight_r2,0.529
+n_shipments,109800.0
