@@ -1,50 +1,60 @@
-## Analysis: what we chose and why
+### 1. Purpose
+- **Question:** about 19,000 different products reached the São Paulo FC's area in one year. Which should the FC hold, how many of each, and when should it reorder?
+- **Objective:** ship as many units as possible from FC stock while keeping capital, space and costs under control.
+- **Output:** the stock list, the reorder point and order quantity per product, the service-level trade-offs, and a day-by-day test of the policy on 16 unseen weeks.
 
-### The decision in one sentence
-**Stock only the ~130 products that sold in at least 6 of the last 12 weeks. Re-plan the list and the reorder points every Monday, target a 95% service level, and let sellers keep shipping everything else directly.** The FC then ships 13% of São Paulo units, with about R$ 153k of stock (20 m³), at R$ 17.97 of inventory cost per unit.
+### 2. The answer
+**Stock only the ~130 most regular products (sold in ≥6 of the last 12 weeks), re-plan every Monday, and target a 95% service level. Sellers keep shipping everything else directly.**
 
-### The finding that shaped everything: the assortment turns over fast
-- In the 16 test weeks, **52% of units came from products that had no sales at all in the previous 34 weeks.**
-- Total demand stayed stable (about 1,100 units a week). The *products* changed, not the volume.
-- So a product list fixed once goes stale within weeks. **Weekly re-planning** is not a refinement here; it is required.
+| KPI | Result |
+|---|---|
+| Products in the FC | 132 of ~19,000 |
+| Share of São Paulo units shipped from the FC | 13% |
+| Fill rate on stocked products | 89.8% |
+| Average stock | R$ 153k (~20 m³, 11 weeks of cover) |
+| Inventory cost per unit served | R$ 17.97 |
 
-### Results: what we chose
+### 3. Key findings
+1. **The assortment turns over fast.** 52% of test-period units came from products with no sales in the previous 34 weeks. Volume is stable, but the products change, so the plan must be rebuilt every week.
+2. **Going deeper costs more per unit.** Stocking 651 products doubles the FC share (25%), but almost doubles the cost (R$ 33.95/unit) and holds 16.5 weeks of stock.
+3. **Service levels above 95% buy nothing.** From 50% to 95%, fill rate rises ~3 points for R$ 27k more stock. Above that only the stock grows.
+4. **Simple forecasts win.** Weekly demand per product is very noisy. A 4-week moving average beats exponential smoothing and Croston, which forecast too high because products fade after their peak.
+5. **The FC is a speed play.** Inventory costs R$ 18 per unit against ~R$ 3 of freight saved (project 1). It pays off through faster delivery, or through sellers paying fulfilment and storage fees (the Amazon FBA model).
 
-| Choice | Options compared | Result | Why |
-|---|---|---|---|
-| **Which products** | Sold in ≥3, ≥6 or ≥9 of the last 12 weeks | **≥6 → 132 products, 13% of units, R$ 17.97/unit, 11.2 weeks of cover** | ≥3 doubles the FC share (25%), but costs R$ 33.95/unit with 16.5 weeks of stock. ≥9 is cheapest (R$ 11.99) but ships only 6% of units. ≥6 is the balance. |
-| **Re-plan weekly** | List fixed once vs. re-planned every Monday | **Weekly: 13% FC share, 11.2 wk cover** (fixed list: 9%, 15.8 wk) | A fixed list is cheaper per unit (R$ 11.71) but ships 30% fewer units, and its stock ages on products that stopped selling |
-| **Service level** | 50% (no safety stock) to 99% | **95%: fill rate 89.8%, stock R$ 153k** | 50% → 95% adds ~3 points of fill rate for R$ 27k more stock. Above 95% nothing improves. |
-| **Order size** | Cap at 4 weeks · cap at 8 weeks · pure EOQ | **8-week cap: R$ 17.97/unit, 11.2 wk cover** | Pure EOQ is 7% cheaper on paper but holds 16 weeks of stock. A 4-week cap means many small orders (R$ 22.58/unit). |
-| **Forecast method** | Naive · moving average (4 wk) · exponential smoothing · Croston | **Moving average, 4 weeks** | Within 2 points of naive on error (111% vs 109% WAPE) but steadier week to week. Smoothing and Croston forecast too high (+28%, +12%) because products fade after their peak. |
+### 4. How we got there: steps and decisions
 
-### Why the fill rate is ~90% and not 95%
-"95% service level" sets the safety stock per replenishment cycle. The fill rate is lower for two reasons:
-- **newly listed products start with an empty shelf** and wait one lead time (~6 days) for their first delivery;
-- **demand that arrives in one big order** can exceed the stock on hand.
+**Step 1 · Define the FC's demand.** Valid delivered items from the zip regions that project 1 assigns to the São Paulo FC (62% of national items).
+*Why:* it is the biggest FC and the same depot as project 2.
 
-The missed units are not lost. The seller ships them directly, exactly as Olist works today.
+**Step 2 · Split time honestly.** 34 calibration weeks (Sep 2017–Apr 2018) and 16 test weeks (May–Aug 2018).
+*Why:* plans and forecasts only ever see the past, as they would in real life.
 
-### How this connects to projects 1 and 2
-- **Project 1** showed that the case for FCs is *faster delivery, not cheaper freight* (an FC saves about R$ 3 of freight per item). Here, inventory costs **R$ 18 per unit**. Stocking the FC therefore has to be justified by speed and conversion, or paid by sellers through **fulfilment and storage fees** (the Amazon FBA model).
-- The FC's demand area comes from project 1. The units it ships go out on the routes planned in **project 2**.
+**Step 3 · Segment the products.** ABC by revenue, crossed with the Syntetos-Boylan demand pattern (smooth / erratic / intermittent / lumpy).
+*Why:* this is the standard for sparse e-commerce demand. Most candidate products are intermittent (they don't sell every week).
 
-### Modelling choices
+**Step 4 · Choose the stock list.** Products sold in ≥6 of the last 12 weeks, rebuilt every Monday.
+*Why:* recent, regular demand. We compared ≥3, ≥6 and ≥9 of 12 weeks, and ≥6 balances FC share against cost per unit.
 
-| Decision | Options considered | Our choice | Why |
-|---|---|---|---|
-| **Scope** | All of Brazil · one FC | **São Paulo FC** (62% of national items in the 3-FC network) | The biggest FC, and the same depot as project 2 |
-| **Time windows** | Random split · time-ordered | **34 calibration weeks (Sep 2017–Apr 2018) → 16 test weeks (May–Aug 2018)** | Forecasts and plans only ever see the past, the way they would in real life |
-| **Segmentation** | ABC only · ABC + demand pattern | **ABC (revenue) × Syntetos-Boylan pattern** (smooth / erratic / intermittent / lumpy) | The standard way to classify sparse e-commerce demand. Most stocked products are *intermittent* (they don't sell every week). |
-| **Stock policy** | Periodic review · continuous review (s, Q) | **Reorder point + order quantity, checked daily** | Standard for a warehouse with daily inbound. Simple to explain and to run. |
-| **Safety stock** | Fixed days of cover · statistical | **z × σ(weekly demand) × √(lead time / 7)** | Ties stock directly to demand variability and lead time |
-| **Lead time** | Fixed · from data | **Seller handling time (data, median 2 days) + 2 days transit + 1 day receiving ≈ 6 days** | Uses each seller's real handling speed |
-| **Unserved demand** | Lost sale · back-order · seller ships it | **Seller ships it directly** | That is the marketplace's current model, so a stockout costs speed, not the sale |
-| **Delisted products** | Keep the stock · return it to the seller | **Return to the seller (R$ 40 per removal order)** | Avoids paying to store products that no longer sell |
-| **Evaluation** | Formulas only · day-by-day simulation | **Simulation on real daily orders, with 4 warm-up weeks** | Shows what the policy actually achieves, including stockouts and ageing stock |
-| **Costs** | Olist figures · assumptions | **Holding 25%/year of value, R$ 40 per replenishment or removal order** | Not published by Olist. The conclusions rely on relative differences between options. |
+**Step 5 · Choose the forecast.** A 4-week moving average.
+*Why:* in a 16-week backtest it was within 2 points of the most accurate method (naive, 109% vs 111% WAPE) but steadier.
+*Alternatives considered:* exponential smoothing (+28% bias) and Croston (+12% bias).
 
-### What would change the decision
-- **Sellers pay storage and fulfilment fees:** Olist's own cost falls, so a deeper assortment (≥3 of 12 weeks) becomes attractive.
-- **Faster inbound** (lead time 6 → 3 days): less safety stock is needed and the fill rate on new listings improves.
-- **More stable demand** (fewer new products each month): a fixed list becomes viable and cheaper.
+**Step 6 · Set the stock policy.** Reorder point = lead-time demand + safety stock (z × σ × √lead time). Order quantity = min(EOQ, 8 weeks of demand).
+*Why:* a standard, explainable policy. Pure EOQ is 7% cheaper but holds 16 weeks of stock; a 4-week cap means too many small orders.
+
+**Step 7 · Set the lead time.** Each seller's handling time from the data (median ~2 days) + 2 days transit + 1 day receiving ≈ 6 days.
+
+**Step 8 · Test it day by day.** Real daily orders, 4 warm-up weeks, and a weekly re-plan. Unserved demand is shipped by the seller (no lost sale), and stock of delisted products is returned to the seller.
+*Why:* this shows what the policy really achieves, including stockouts and ageing stock.
+
+**Assumptions (illustrative):** holding cost 25% of value per year, R$ 40 per replenishment or removal order, customer price used as the unit value.
+
+**Why the fill rate is ~90% and not 95%:** newly listed products wait one lead time (~6 days) for their first delivery, and single large orders can exceed the stock on hand.
+
+### 5. Risks: what would change the decision
+- **Sellers pay storage and fulfilment fees:** Olist's cost falls, so a deeper assortment becomes attractive.
+- **Faster inbound** (6 → 3 days): less safety stock, and better fill on new listings.
+- **A more stable assortment:** a fixed list becomes viable, and it is cheaper per unit (R$ 11.71).
+
+### 6. Next step
+This closes the loop: **where** the FCs are (project 1), **how** they deliver (project 2), and **what** they hold (project 3). A natural extension is a fulfilment-fee model that tests what sellers would pay for faster delivery.

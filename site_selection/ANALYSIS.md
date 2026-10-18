@@ -1,38 +1,51 @@
-## Analysis: what we chose and why
+### 1. Purpose
+- **Question:** if Olist moves from "every seller ships" to its own fulfilment centres (FCs), how many should it open, and where?
+- **Objective:** find the number and location of FCs that bring orders closest to customers, and show what each extra FC is worth.
+- **Output:** a recommended network, a 1–6 FC trade-off curve, the KPIs per scenario, and a map of which FC serves which region.
 
-### The decision in one sentence
-**Open 3 fulfilment centres, in São Paulo, the Minas Gerais/Rio corridor and the Northeast. In practice that means São Paulo + Rio de Janeiro + Salvador.** This nearly halves the distance to customers (774 → 411 km) and doubles next-day reach (27% → 58%).
+### 2. The answer
+**Open 3 FCs: São Paulo, the Minas Gerais/Rio corridor, and the Northeast. In practice that means São Paulo + Rio de Janeiro + Salvador.**
 
-### Why 3 FCs, and not 1, 2 or 5?
-
-| FCs | What the extra FC buys | Verdict |
-|---|---|---|
-| 1 | A São Paulo hub alone already beats today's direct shipping (−13% km) | Too little: 62% of orders are still outside next-day reach |
-| 2 | Adds the Northeast: average distance −36% vs today, but next-day reach barely moves (38% → 39%) | Helps remote customers, but not the dense South-East |
-| **3** | **Adds Minas Gerais/Rio: next-day reach jumps 39% → 58%, the biggest single gain** | **The knee of the curve, so start here** |
-| 4–5 | Adds the South and the Centre-West: steady but smaller gains (+4 pp each) | Phase 2, once volume grows |
-| 6 | 800 km reach does not improve at all | Not worth it |
-
-The freight saved by each extra FC falls quickly (R$ 80k → 39k → 30k → 27k → 14k a year). At today's volume, **service level, not freight cost**, is the reason to open FCs.
-
-### Why São Paulo + Rio + Salvador instead of the model's exact sites?
-The optimiser picks **Juiz de Fora (MG)** and **Lagarto (SE)** because each sits at the mathematical centre of its demand. A real company also needs workers, warehouse space and carriers. The big-metro network costs **only 4% more distance** and is far easier to run, so that is the version to take to stakeholders.
-
-### Modelling choices
-
-| Decision | Options considered | Our choice | Why |
+| KPI | Today | 3 FCs | Change |
 |---|---|---|---|
-| **Objective** | Minimise cost · minimise distance · maximise coverage | **Minimise order-weighted distance**, and report cost as a break-even | FC rent and labour costs are not in the data. Distance drives both delivery time and freight. |
-| **Demand unit** | 5-digit zip (15k points) · state (27) · 3-digit zip zone (849) | **849 three-digit zones** | Detailed enough to see cities, and small enough to solve exactly |
-| **What one unit of demand is** | Orders · revenue · weight | **Orders** | Each order is one delivery, i.e. one service event for a customer |
-| **Candidate sites** | All 849 zones · top-N only · top 3 per state + top 60 nationally | **119 candidates (top 3 per state + top 60)** | Every region has a candidate, and the model stays exactly solvable (~100k variables) |
-| **Model** | Centre of gravity · k-means clustering · maximal coverage · **p-median** | **p-median (MILP)** | The standard model for "open k sites, minimise weighted distance". It gives a proven optimum and makes the k = 1…6 trade-off easy. Centre of gravity only handles 1 site, k-means gives no proven optimum, and coverage needs an arbitrary radius. |
-| **Solver** | Heuristic · exact MILP | **PuLP + HiGHS (exact)** | Free, fast (seconds per k), with proven optimality |
-| **Distance** | Road-network API · straight line · straight line × 1.3 | **Haversine × 1.3** | Transparent and free. 1.3 is a common road-detour factor, and it is accurate enough to compare scenarios. |
-| **Turning km into business KPIs** | Show km only · assume rates · learn from data | **Regressions on ~110k real shipments** (days and R$ against km) | Converts an abstract distance into delivery days and freight cost that stakeholders understand |
-| **Data** | Raw CSVs · cleaned layer | **Cleaned layer, valid delivered orders only** | Avoids duplicate map points, broken dates and orders that never shipped |
+| Average distance to customer | 774 km | 411 km | −47% |
+| Orders within 300 km (next-day reach) | 27% | 58% | +30 pp |
+| Estimated delivery time | 12.2 days | 10.6 days | −1.7 days |
+| Estimated freight per item | R$ 19.9 | R$ 17.0 | −15% |
 
-### What would change the decision
-- **3× volume growth:** freight savings scale up, and 4–5 FCs start paying for themselves.
-- **High inbound cost to the Northeast:** 76% of supply sits in São Paulo, so the third FC may move to Rio/Belo Horizonte.
-- **Real FC costs:** each extra FC is worth opening only if it costs less than its freight saving plus the value of faster delivery.
+### 3. Key findings
+1. **3 FCs is the knee of the curve.** The 3rd FC lifts next-day reach from 39% to 58%, the biggest jump of any step. After 5 FCs the curve is flat.
+2. **Big metros cost almost nothing extra.** The model's exact sites (Juiz de Fora, Lagarto) are only 4% better on distance than São Paulo + Rio + Salvador, which are far easier to staff and supply.
+3. **FCs are about speed, not freight.** Each extra FC saves only R$ 80k → 39k → 30k → 27k → 14k of freight a year. The business case is faster delivery.
+4. **Supply is concentrated, demand is not.** 76% of items ship from São Paulo state, but only 42% of orders go there. That mismatch is why parcels travel ~775 km today.
+
+### 4. How we got there: steps and decisions
+
+**Step 1 · Clean the data.** We used valid delivered orders only, with one median coordinate per zip code.
+*Why:* the raw files have duplicated map points, coordinates outside Brazil and orders that never shipped.
+
+**Step 2 · Group demand into regions.** Orders were grouped into 849 three-digit zip regions, weighted by number of orders.
+*Why:* 5-digit zips (15k points) are too many to solve exactly, and 27 states are too coarse. One order is one delivery, so orders, not revenue, measure the service need.
+
+**Step 3 · Choose candidate sites.** The top 3 regions per state plus the top 60 nationally, 119 candidates in total.
+*Why:* every region gets a candidate, and the model stays small enough (~100k variables) for a proven optimum.
+
+**Step 4 · Choose the model.** A p-median model, solved exactly with PuLP + HiGHS for k = 1…6. It opens k sites and minimises order-weighted road distance.
+*Why:* it is the standard model for "open k sites, serve demand as close as possible".
+*Alternatives considered:* centre of gravity (handles one site only), k-means (no proven optimum), maximal coverage (needs an arbitrary radius).
+
+**Step 5 · Measure distance.** Straight-line distance × 1.3.
+*Why:* transparent and free. 1.3 is a common road-detour factor, and it is accurate enough to compare scenarios.
+
+**Step 6 · Turn km into business KPIs.** Two regressions on ~110k real shipments: delivery days ≈ 8.6 + 0.47 per 100 km, and freight ≈ R$ 8.2 + 0.82 per 100 km + 2.58 per kg.
+*Why:* managers decide on days and Reais, not kilometres.
+
+**Step 7 · Pick the network.** 3 FCs (the knee), then swap the mathematical sites for the nearest big metros (+4% distance).
+
+### 5. Risks: what would change the decision
+- **Volume grows ~3×:** freight savings scale up, and 4–5 FCs start to pay for themselves.
+- **Inbound cost to the Northeast is high:** supply sits in São Paulo, so the 3rd FC may shift to Rio/Belo Horizonte.
+- **Real FC costs:** an FC is worth opening only if it costs less than its freight saving plus the value of faster delivery.
+
+### 6. Next step
+The São Paulo FC serves ~62% of orders. **Project 2** plans its daily delivery routes, and **Project 3** decides what it should stock.
