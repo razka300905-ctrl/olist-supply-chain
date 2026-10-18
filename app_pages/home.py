@@ -59,9 +59,10 @@ with p2:
 with p3:
     with st.container(border=True):
         st.markdown("#### 3 · Inventory")
-        st.caption("⏳ Next")
-        st.write("How much stock each FC should hold: demand forecasting, safety stock and "
-                 "service level against holding cost.")
+        st.caption("✅ Done")
+        st.write("What the São Paulo FC should stock: ABC segmentation, forecast backtest, "
+                 "reorder points and a day-by-day simulation.")
+        st.page_link("app_pages/inventory.py", label="Open inventory →")
 
 st.divider()
 st.subheader("How the projects connect")

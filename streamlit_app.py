@@ -11,6 +11,7 @@ pages = {
         st.Page("app_pages/data_cleaning.py", title="0 · Data cleaning", icon="🧹"),
         st.Page("app_pages/site_selection.py", title="1 · Site selection", icon="📍"),
         st.Page("app_pages/vrp.py", title="2 · Vehicle routing", icon="🚚"),
+        st.Page("app_pages/inventory.py", title="3 · Inventory", icon="📦"),
     ],
 }
 st.navigation(pages).run()

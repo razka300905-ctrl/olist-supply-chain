@@ -1,0 +1,8 @@
+,value
+inbound_transit_days,2
+receiving_days,1
+holding_rate_per_year,0.25
+order_cost_rs,40.0
+max_cover_weeks,8
+stock_rule,>= 6 of last 12 weeks with sales
+chosen_service_level,0.95

@@ -6,3 +6,8 @@ archive.zip
 # Raw Kaggle CSVs (121 MB) - download them, see README
 archive/
 data_pipeline/clean_csv/
+# Large intermediate inventory files (rebuilt by inventory/run_all.py; the app does not need them)
+inventory/outputs/daily_demand.csv
+inventory/outputs/weekly_demand.csv
+inventory/outputs/products.csv
+inventory/outputs/segmentation.csv
