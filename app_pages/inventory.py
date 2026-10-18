@@ -88,7 +88,7 @@ with tab_res:
                       "≥6 of 12 weeks is the balance.",
         "service_level": "From 50% to 95% the fill rate rises ~3 points. Above 95% stock grows but fill rate does not: "
                          "the misses come mostly from newly listed products still waiting for their first delivery.",
-        "order_cap": "Pure EOQ is cheapest on paper but holds 16 weeks of stock. A 4-week cap means many small orders; "
+        "order_cap": "Pure EOQ is ~2% cheaper on paper but holds 15 weeks of stock. A 4-week cap means many small orders; "
                      "8 weeks is the middle ground.",
     }
     callout(captions[sweep], "insight")
@@ -131,19 +131,57 @@ with tab_res:
         })
     st.caption("How to read a row: when stock on hand + on order falls to *Reorder at*, order *Order qty* units from the seller.")
 
-    section(4, "Which forecast method?", "16 unseen weeks, stocked products")
-    f = fc.set_index("method").loc[["naive", "ma4", "ses", "croston"]]
-    names = {"naive": "Naive", "ma4": "Moving avg (4 wk)", "ses": "Exp. smoothing", "croston": "Croston (SBA)"}
-    fig = make_subplots(rows=1, cols=2, subplot_titles=["Error (WAPE %, lower is better)", "Bias (%, positive = too high)"])
-    for i, c in enumerate(["wape_pct", "bias_pct"], start=1):
-        fig.add_bar(x=[names[m] for m in f.index], y=f[c], row=1, col=i, showlegend=False,
-                    marker_color=[SERIES[0] if m == "ma4" else LIGHT_BLUE for m in f.index],
-                    text=[f"{v:.0f}%" for v in f[c]], textposition="outside", hovertemplate="%{x}: %{y:.1f}%<extra></extra>")
-        fig.update_yaxes(range=[0, f[c].max() * 1.28], row=1, col=i)
-    st.plotly_chart(style_fig(fig, 300).update_layout(bargap=0.35), width="stretch")
-    callout("Weekly demand per product is very noisy (every method is above 100% error), which is why safety stock is needed. "
-            "The 4-week moving average is used: it is nearly as accurate as naive but steadier. Smoothing and Croston "
-            "forecast too high because products fade after their peak.", "insight")
+    section(4, "Which forecast method?", "Compared at two levels: per product (drives stock) and FC total per day (drives staffing)")
+    lvl = st.segmented_control("Level", ["product", "daily"], default="product",
+                               format_func={"product": "Per product, per week", "daily": "FC total, per day"}.get)
+    if (lvl or "product") == "product":
+        order = ["naive", "ma4", "ses", "holt", "holt_damped", "croston", "tsb"]
+        names = {"naive": "Naive", "ma4": "MA 4 wk", "ses": "SES", "holt": "Holt", "holt_damped": "Holt damped",
+                 "croston": "Croston", "tsb": "TSB"}
+        f = fc.set_index("method").loc[order]
+        stock = t[t.sweep == "forecast"].set_index("forecast_method").loc[order]
+        fig = make_subplots(rows=1, cols=3, horizontal_spacing=0.07,
+                            subplot_titles=["Error: WAPE (%)", "Error: scaled RMSE (%)", "Stock needed in simulation (R$k)"])
+        for i, (vals, fmt) in enumerate([(f.wape_pct, "{:.0f}%"), (f.scaled_rmse_pct, "{:.0f}%"),
+                                         (stock.avg_inventory_value / 1000, "{:.0f}k")], start=1):
+            fig.add_bar(x=[names[m] for m in order], y=vals, row=1, col=i, showlegend=False,
+                        marker_color=[SERIES[0] if m == "ses" else LIGHT_BLUE for m in order],
+                        text=[fmt.format(v) for v in vals], textposition="outside",
+                        hovertemplate="%{x}: %{y:.1f}<extra></extra>")
+            fig.update_yaxes(range=[0, vals.max() * 1.28], row=1, col=i)
+        fig.update_xaxes(tickangle=0, tickfont=dict(size=10))
+        st.plotly_chart(style_fig(fig, 330).update_layout(bargap=0.3), width="stretch")
+        callout("<b>The two error metrics disagree</b> (WAPE favours forecasts near zero, which flatters naive), so the method "
+                "is chosen on the <b>stock outcome</b>. <b>SES</b> keeps the fill rate of the moving average "
+                f"({stock.loc['ses', 'fill_rate_pct']:.1f}% vs {stock.loc['ma4', 'fill_rate_pct']:.1f}%) with ~9% less stock. "
+                "Holt adds nothing (no trend), and Croston/TSB hold little stock but miss more orders. "
+                "<b>Holt-Winters is not usable here:</b> it needs 2 years of history, and weeks full of zeros have no seasonal shape.",
+                "insight")
+    else:
+        daily = load("forecast_daily_backtest", index_col=0).sort_values("wape_pct")
+        series = load("forecast_daily_series", index_col=0, parse_dates=True)
+        wk = load("weekday_index", index_col=0)["index"]
+        best = daily.index[0]
+        c1, c2 = st.columns([1, 1.5], gap="large")
+        with c1:
+            fig = go.Figure(go.Bar(y=daily.label[::-1], x=daily.wape_pct[::-1], orientation="h",
+                                   marker_color=[SERIES[0] if m == best else LIGHT_BLUE for m in daily.index[::-1]],
+                                   text=[f"{v:.1f}%" for v in daily.wape_pct[::-1]], textposition="outside",
+                                   hovertemplate="%{y}: %{x:.1f}% WAPE<extra></extra>"))
+            fig.update_layout(title="7-day-ahead error (WAPE %)", title_font_size=13,
+                              xaxis_range=[0, daily.wape_pct.max() * 1.2])
+            st.plotly_chart(style_fig(fig, 360), width="stretch")
+        with c2:
+            fig = go.Figure()
+            fig.add_scatter(x=series.index, y=series.actual, name="Actual", line=dict(color="#898781", width=1.5))
+            fig.add_scatter(x=series.index, y=series[best], name=daily.loc[best, "label"], line=dict(color=SERIES[0], width=2.5))
+            fig.update_layout(title="Actual vs. forecast, test period (units per day)", title_font_size=13,
+                              legend=dict(orientation="h", y=1.12, x=0))
+            st.plotly_chart(style_fig(fig, 360), width="stretch")
+        callout(f"The FC's daily volume has a clear weekday pattern (Mon {wk['Mon']:.2f}× average, Sat {wk['Sat']:.2f}×). "
+                f"<b>{daily.loc[best, 'label']}</b> wins with <b>{daily.loc[best, 'wape_pct']:.1f}%</b> error and almost no bias, "
+                f"~28% better than a 7-day moving average ({daily.loc['ma7', 'wape_pct']:.1f}%). The weekday season does the work; "
+                "the trend term adds almost nothing. Use it to plan pickers and next-day vehicles.", "insight")
 
 # ================================================================== analysis
 with tab_an:
@@ -156,8 +194,8 @@ with tab_m:
         """
 - **Demand:** valid delivered items from customers in the zones served by the São Paulo FC (project 1).
   Calibration Sep 2017–Apr 2018 (34 weeks), test May–Aug 2018 (16 weeks).
-- **Weekly plan (Mondays, past data only):** stock list = sold in ≥6 of the last 12 weeks; forecast = 4-week moving
-  average; safety stock = z × σ(weekly demand) × √(lead time / 7); reorder point = lead-time demand + safety stock;
+- **Weekly plan (Mondays, past data only):** stock list = sold in ≥6 of the last 12 weeks; forecast = exponential
+  smoothing (SES); safety stock = z × σ(weekly demand) × √(lead time / 7); reorder point = lead-time demand + safety stock;
   order quantity = min(EOQ, 8 weeks of demand).
 - **Simulation:** real daily orders with 4 warm-up weeks. Unserved demand is shipped by the seller (no lost sale), and
   stock of delisted products is returned to the seller.

@@ -3,8 +3,9 @@
 Why weekly re-planning: Olist's assortment turns over fast. 52% of units sold in the test weeks
 come from products with no sales in the calibration weeks, so a product list fixed once goes stale.
 Every Monday the plan is rebuilt from the latest data only (no peeking at the future):
-  stock list          products sold in >= 3 of the last 12 weeks
-  forecast_week       average of the last 4 weeks (MA4, see 03_forecast.py)
+  stock list          products sold in >= 6 of the last 12 weeks
+  forecast_week       next-week forecast from FORECAST_METHOD (SES; all methods in forecasting.py
+                      are compared in the "forecast" sweep, so the method is chosen on the stock outcome)
   sigma_week          standard deviation of weekly demand over the last 12 weeks
   lead time L (days)  seller handling days (data) + inbound transit + receiving (assumed)
   safety stock SS     = z(service level) x sigma_week x sqrt(L / 7)
@@ -15,13 +16,15 @@ on order is at or below ROP are reordered. Demand the FC cannot serve is shipped
 (today's model), so it is an FC miss, not a lost sale. Delisted products stop being reordered and their
 remaining stock is returned to the seller at the next weekly re-plan (a "removal order").
 The simulation starts 4 weeks early with an empty FC (warm-up); KPIs count only the 16 test weeks.
-Trade-offs: how deep into the assortment to go (stock rule) and which service level to target.
+Trade-offs: assortment depth (stock rule), service level, order size cap, forecast method, fixed vs weekly list.
 """
 from pathlib import Path
 from statistics import NormalDist
 
 import numpy as np
 import pandas as pd
+
+from forecasting import METHODS, next_week
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "outputs"
@@ -35,7 +38,8 @@ HOLDING_RATE = 0.25           # per year, share of unit value (capital, space, i
 ORDER_COST = 40.0             # R$ per replenishment order (admin, inbound handling)
 MAX_COVER_WEEKS = 8           # never order more than 8 weeks of forecast demand at once
 ORDER_CAPS = [4, 8, None]     # compared: tighter cap = less stock but more orders; None = pure EOQ
-RECENT_WEEKS, MA_WEEKS = 12, 4
+RECENT_WEEKS = 12
+FORECAST_METHOD = "ses"       # chosen in the forecast sweep: same fill rate as MA4 with ~9% less stock
 STOCK_RULES = [3, 6, 9]       # list a product if it sold in >= this many of the last 12 weeks
 CHOSEN_RULE = 6
 SERVICE_LEVELS = [0.50, 0.80, 0.90, 0.95, 0.98, 0.99]
@@ -44,11 +48,12 @@ CHOSEN_LEVEL = 0.95
 
 def plan(weekly_grid, monday, prod, z, min_weeks):
     """Stock list and policy parameters using only the weeks before `monday`."""
-    hist = weekly_grid.loc[:monday - pd.Timedelta(days=1)].iloc[-RECENT_WEEKS:]
+    full = weekly_grid.loc[:monday - pd.Timedelta(days=1)]
+    hist = full.iloc[-RECENT_WEEKS:]
     listed = hist.columns[(hist > 0).sum() >= min_weeks]
     h = hist[listed]
     p = prod.loc[listed].copy()
-    p["forecast_week"] = h.iloc[-MA_WEEKS:].mean()
+    p["forecast_week"] = [next_week(FORECAST_METHOD, full[c].to_numpy(float)) for c in listed]
     p["sigma_week"] = h.std(ddof=1)
     p["safety_stock"] = z * p.sigma_week * np.sqrt(p.lead_days / 7)
     p["reorder_point"] = np.ceil(p.forecast_week * p.lead_days / 7 + p.safety_stock).astype(int)
@@ -118,6 +123,7 @@ def simulate(weekly_grid, daily, prod, level, min_weeks, replan_weekly=True):
         "service_level_pct": level * 100,
         "stock_rule_min_weeks": min_weeks,
         "order_cap_weeks": MAX_COVER_WEEKS or "EOQ only",
+        "forecast_method": FORECAST_METHOD,
         "planning": "weekly re-planning" if replan_weekly else "list fixed at start",
         "fill_rate_pct": stats["served"] / stats["listed_demand"] * 100,
         "fc_share_of_all_units_pct": stats["served"] / total_units * 100,
@@ -166,7 +172,17 @@ def main() -> None:
         kpi, _, _ = simulate(grid, daily, prod, level, CHOSEN_RULE)
         rows.append({**kpi, "sweep": "service_level"})
         show(f"CSL {level:.0%} @rule {CHOSEN_RULE}", kpi)
-    global MAX_COVER_WEEKS
+    global MAX_COVER_WEEKS, FORECAST_METHOD
+    chosen_method = FORECAST_METHOD
+    for method in METHODS:                                     # which forecast gives the best stock outcome?
+        FORECAST_METHOD = method
+        if method == chosen_method:
+            rows.append({**rows[STOCK_RULES.index(CHOSEN_RULE)], "sweep": "forecast"})
+            continue
+        kpi, _, _ = simulate(grid, daily, prod, CHOSEN_LEVEL, CHOSEN_RULE)
+        rows.append({**kpi, "sweep": "forecast"})
+        show(f"fc {method}", kpi)
+    FORECAST_METHOD = chosen_method
     chosen_cap = MAX_COVER_WEEKS
     for cap in ORDER_CAPS:                                     # how much to order at once?
         MAX_COVER_WEEKS = cap

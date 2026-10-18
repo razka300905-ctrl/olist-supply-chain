@@ -60,7 +60,7 @@ answers = [
      "vehicles.", "app_pages/vrp.py"),
     ("📦 3 · What?", "What should the FC stock, and how much?",
      "<b>~130 regular products</b>, re-planned weekly at a 95% service level: 13% of units from FC stock, "
-     "R$ 153k of inventory.", "app_pages/inventory.py"),
+     "R$ 139k of inventory.", "app_pages/inventory.py"),
 ]
 for col, (eyebrow, q, a, page) in zip(c, answers):
     with col:
@@ -81,7 +81,7 @@ kpis([
 section(4, "Overall conclusion")
 callout(
     "<b>An FC network is a speed strategy, not a cost-saving one.</b> FCs cut distance in half and raise next-day "
-    "reach to 58%, but they save only ~R$ 3 of freight per item while inventory costs ~R$ 18 per unit. "
+    "reach to 58%, but they save only ~R$ 3 of freight per item while inventory costs ~R$ 17 per unit. "
     "<b>Recommendation:</b> start with a São Paulo FC holding only the fast-moving products, deliver with a mixed "
     "fleet, and fund it through seller fulfilment fees (the Amazon FBA model). Add Rio and the Northeast as volume grows.",
     "recommend",

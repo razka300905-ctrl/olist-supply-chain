@@ -1,5 +1,8 @@
-method,wape_pct,bias_pct
-naive,109.26,6.94
-ma4,111.13,14.22
-ses,117.83,28.32
-croston,132.15,12.33
+method,wape_pct,scaled_rmse_pct,bias_pct
+naive,109.26,232.1,6.94
+ma4,111.13,217.14,14.22
+ses,117.83,201.77,28.32
+holt_damped,117.86,206.91,28.2
+holt,124.17,214.82,40.29
+tsb,130.95,215.06,34.86
+croston,132.15,224.41,12.33

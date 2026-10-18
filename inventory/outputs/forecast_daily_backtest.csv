@@ -1,0 +1,10 @@
+method,wape_pct,scaled_rmse_pct,bias_pct,label
+hw_multiplicative,18.96,23.59,-0.61,Holt-Winters (multiplicative)
+seasonal_ses,19.43,23.85,-4.08,Seasonal ES (no trend)
+hw_additive,19.44,23.85,-3.9,Holt-Winters (additive)
+seasonal_naive,24.2,30.13,-1.16,Seasonal naive
+ma7,26.35,31.35,-1.16,Moving avg (7 d)
+holt_damped,26.79,31.67,-13.07,Holt damped
+ses,26.8,31.71,-13.31,Exp. smoothing
+holt,26.83,31.66,-12.72,Holt
+naive,28.19,33.48,-16.81,Naive

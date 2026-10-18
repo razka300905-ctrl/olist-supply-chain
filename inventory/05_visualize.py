@@ -66,20 +66,58 @@ def service_chart(t):
     plt.close(fig)
 
 
-def forecast_chart(f):
-    f = f.set_index("method").loc[["naive", "ma4", "ses", "croston"]]
-    names = {"naive": "Naive", "ma4": "Moving avg (4 wk)", "ses": "Exp. smoothing", "croston": "Croston (SBA)"}
-    fig, axes = plt.subplots(1, 2, figsize=(11, 3.6))
-    bars(axes[0], [names[m] for m in f.index], f.wape_pct.tolist(), "{:.0f}%", 1, "Forecast error (WAPE, lower is better)")
-    bars(axes[1], [names[m] for m in f.index], f.bias_pct.tolist(), "{:+.0f}%", 1, "Bias (positive = forecasts too high)")
+ORDER = ["naive", "ma4", "ses", "holt", "holt_damped", "croston", "tsb"]
+NAMES = {"naive": "Naive", "ma4": "MA 4 wk", "ses": "SES", "holt": "Holt", "holt_damped": "Holt damp.",
+         "croston": "Croston", "tsb": "TSB"}
+
+
+def forecast_chart(f, t):
+    """Product level: two error metrics disagree, so the decision uses the stock outcome."""
+    f = f.set_index("method").loc[ORDER]
+    stock = t[t.sweep == "forecast"].set_index("forecast_method").loc[ORDER]
+    chosen = ORDER.index("ses")
+    labels = [NAMES[m] for m in ORDER]
+    fig, axes = plt.subplots(1, 3, figsize=(13, 3.9))
+    bars(axes[0], labels, f.wape_pct.tolist(), "{:.0f}%", chosen, "Error: WAPE (%)")
+    bars(axes[1], labels, f.scaled_rmse_pct.tolist(), "{:.0f}%", chosen, "Error: scaled RMSE (%)")
+    bars(axes[2], labels, (stock.avg_inventory_value / 1000).tolist(), "{:.0f}k", chosen,
+         "Stock needed in the simulation (R$)")
     for ax in axes:
         ax.tick_params(axis="x", labelsize=8.5)
-    fig.suptitle("16-week backtest on the stocked products: simple, fast-reacting methods win",
+    fig.suptitle("Product level: the error metrics disagree, so the method is chosen on the stock outcome",
                  x=0.01, ha="left", fontsize=12.5, fontweight="bold")
-    fig.text(0.01, 0.01, "Dark bar = used in the stock policy. MA4 is almost as accurate as naive but does not jump "
-             "with every single busy week, so reorder points and orders stay steadier.", fontsize=8.5, color=INK_2)
+    fig.text(0.01, 0.01, "Dark bar = SES, used in the policy: the same fill rate as MA4 (89.6% vs 89.8%) with ~9% less "
+             "stock. Holt adds nothing (no trend). Croston/TSB hold little stock but miss more orders.",
+             fontsize=8.5, color=INK_2)
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     fig.savefig(FIG / "forecast_backtest.png", dpi=160)
+    plt.close(fig)
+
+
+def daily_chart(table, series):
+    """FC total daily volume: Holt-Winters vs. simpler methods."""
+    table = table.sort_values("wape_pct")
+    best = table.index[0]
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.1), gridspec_kw={"width_ratios": [1, 1.5]})
+    ax = axes[0]
+    y = range(len(table))[::-1]
+    ax.barh(list(y), table.wape_pct, color=[BLUE if m == best else LIGHT for m in table.index], height=0.6)
+    ax.set_yticks(list(y), table.label, fontsize=9)
+    for yi, v in zip(y, table.wape_pct):
+        ax.text(v + 0.4, yi, f"{v:.1f}%", va="center", fontsize=9)
+    ax.set_title("7-day-ahead error (WAPE, lower is better)")
+    ax.grid(axis="y", visible=False)
+    ax.set_xlim(0, table.wape_pct.max() * 1.18)
+    ax = axes[1]
+    ax.plot(series.index, series.actual, color=MUTED, lw=1.4, label="Actual")
+    ax.plot(series.index, series[best], color=BLUE, lw=2, label=table.loc[best, "label"])
+    ax.set_title("Actual vs. Holt-Winters forecast, test period (units per day)")
+    ax.legend(frameon=False, loc="upper left", fontsize=9)
+    ax.tick_params(axis="x", labelsize=8.5)
+    fig.suptitle("FC daily volume: models with a weekday pattern cut the error by ~28%",
+                 x=0.01, ha="left", fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    fig.savefig(FIG / "forecast_daily.png", dpi=160)
     plt.close(fig)
 
 
@@ -88,7 +126,9 @@ def main() -> None:
     t = pd.read_csv(OUT / "policy_tradeoff.csv")
     assortment_chart(t)
     service_chart(t)
-    forecast_chart(pd.read_csv(OUT / "forecast_backtest.csv"))
+    forecast_chart(pd.read_csv(OUT / "forecast_backtest.csv"), t)
+    daily_chart(pd.read_csv(OUT / "forecast_daily_backtest.csv", index_col=0),
+                pd.read_csv(OUT / "forecast_daily_series.csv", index_col=0, parse_dates=True))
     print("Figures written to", FIG)
 
 
