@@ -52,13 +52,14 @@ with p1:
 with p2:
     with st.container(border=True):
         st.markdown("#### 2 · Vehicle routing")
-        st.caption("⏳ Next")
-        st.write("Daily delivery routes from the chosen FCs: fleet size, route length and "
-                 "on-time delivery trade-offs.")
+        st.caption("✅ Done")
+        st.write("Daily last-mile routes from the São Paulo FC: vans vs motorbikes, normal day vs "
+                 "Black Friday, solved with OR-Tools.")
+        st.page_link("app_pages/vrp.py", label="Open vehicle routing →")
 with p3:
     with st.container(border=True):
         st.markdown("#### 3 · Inventory")
-        st.caption("🗓️ Planned")
+        st.caption("⏳ Next")
         st.write("How much stock each FC should hold: demand forecasting, safety stock and "
                  "service level against holding cost.")
 

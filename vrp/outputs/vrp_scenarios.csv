@@ -1,0 +1,8 @@
+scenario,day,date,fleet,orders,orders_served,orders_not_delivered,orders_too_big_for_fleet,vans,motorbikes,total_km,total_cost,avg_route_hours,max_route_hours,avg_stops_per_route,avg_volume_util_pct,km_per_order,cost_per_order,fleet_bound_reached,baseline_km,baseline_cost,baseline_vehicles,cost_saving_vs_baseline_pct
+normal__van_only,normal,2018-03-01,van_only,63,63,0,0,4,0,439.06,2002.97,7.61,8.88,15.75,8.52,6.97,31.79,False,653.64,2619.0,5,23.52
+normal__motorbike_only,normal,2018-03-01,motorbike_only,63,59,4,4,0,7,535.42,1447.4,3.25,6.03,8.43,94.24,9.07,24.53,False,744.94,1520.73,7,4.82
+normal__mixed,normal,2018-03-01,mixed,63,63,0,0,2,2,479.69,1470.31,6.77,8.7,15.75,55.85,7.61,23.34,False,875.38,2044.21,8,28.07
+black_friday__van_only,black_friday,2017-11-24,van_only,248,248,0,0,11,0,1160.23,5456.25,8.55,8.99,22.55,9.67,4.68,22.0,False,1335.54,6029.09,12,9.5
+black_friday__motorbike_only,black_friday,2017-11-24,motorbike_only,248,242,6,6,0,33,2235.66,6722.48,2.87,5.88,7.33,98.48,9.24,27.78,False,2868.11,6943.84,33,3.19
+black_friday__mixed,black_friday,2017-11-24,mixed,248,248,0,0,6,9,1466.19,4882.03,5.92,8.96,16.53,64.02,5.91,19.69,False,3084.26,7932.45,35,38.45
+black_friday__normal_fleet,black_friday,2017-11-24,normal_fleet (2 van + 2 moto),248,118,130,0,2,2,397.42,1380.02,7.57,8.98,29.5,57.05,3.37,11.7,False,261.51,1344.23,4,-2.66

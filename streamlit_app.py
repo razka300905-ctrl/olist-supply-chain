@@ -10,6 +10,7 @@ pages = {
     "Projects": [
         st.Page("app_pages/data_cleaning.py", title="0 · Data cleaning", icon="🧹"),
         st.Page("app_pages/site_selection.py", title="1 · Site selection", icon="📍"),
+        st.Page("app_pages/vrp.py", title="2 · Vehicle routing", icon="🚚"),
     ],
 }
 st.navigation(pages).run()

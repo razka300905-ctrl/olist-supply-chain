@@ -8,8 +8,8 @@ Three end-to-end supply-chain case studies on the [Olist Brazilian e-commerce da
 |---|---|---|---|
 | 0 | Data foundation: cleaning pipeline, cleaning log, validations | ✅ Done | [data_pipeline/](data_pipeline/README.md) |
 | 1 | Site selection: how many fulfilment centres, and where? | ✅ Done | [site_selection/](site_selection/README.md) |
-| 2 | Vehicle routing: delivery routes from the chosen FCs | ⏳ Next | – |
-| 3 | Inventory: stock levels per FC | 🗓️ Planned | – |
+| 2 | Vehicle routing: daily last-mile routes from the São Paulo FC | ✅ Done | [vrp/](vrp/README.md) |
+| 3 | Inventory: stock levels per FC | ⏳ Next | – |
 
 ## Repository layout
 
@@ -20,6 +20,7 @@ Three end-to-end supply-chain case studies on the [Olist Brazilian e-commerce da
 ├── requirements.txt          # app dependencies (Streamlit Cloud)
 ├── data_pipeline/            # raw CSV -> clean SQLite tables + cleaning log
 ├── site_selection/           # SQL demand model, p-median optimisation, figures, outputs
+├── vrp/                      # last-mile routing from the São Paulo FC (OR-Tools)
 └── archive/                  # raw Kaggle CSVs (not committed, download below)
 ```
 
