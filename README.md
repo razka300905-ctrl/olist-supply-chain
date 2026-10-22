@@ -55,7 +55,7 @@ The site in `docs/` is generated from the project outputs, so the numbers always
 
 **Hosting on Vercel (free):**
 
-1. Sign in at [vercel.com](https://vercel.com) with GitHub.
+1. Sign in at [vercel.com](https://vercel.com) with GitHub. In the import screen set **Root Directory = `docs`** and **Application Preset = Other** (Vercel otherwise detects the Python folders as "Services").
 2. **Add New → Project**, then import this repository.
 3. Keep the defaults: `vercel.json` already sets *Framework: Other*, no install or build command, and output folder `docs`.
 4. Click **Deploy**. Every push to `main` redeploys automatically.
